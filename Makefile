@@ -15,10 +15,10 @@ down:
 	docker-compose -f ${DOCKER_COMPOSE_FILE} down
 
 migrate:
-	docker-compose -f ${DOCKER_COMPOSE_FILE} run --rm web ./manage.py migrate --noinput
+	docker-compose -f ${DOCKER_COMPOSE_FILE} run --rm web python manage.py migrate --noinput
 
 migrations:
-	docker-compose -f ${DOCKER_COMPOSE_FILE} run --rm web ./manage.py makemigrations
+	docker-compose -f ${DOCKER_COMPOSE_FILE} run --rm web python manage.py makemigrations
 
 pytest:
 	docker-compose -f ${DOCKER_COMPOSE_FILE} run --rm -w ${PROJECT_DIR} -e HUEY_IMMEDIATE=True web pytest --cov-config=.coveragerc --cov=src -x --reuse-db src

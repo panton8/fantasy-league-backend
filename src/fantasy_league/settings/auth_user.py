@@ -5,11 +5,11 @@ env = environ.Env()
 
 __all__ = (
     'AUTH_PASSWORD_VALIDATORS',
-    #'AUTH_USER_MODEL',
+    'AUTH_USER_MODEL',
     'AUTHENTICATION_BACKENDS',
 )
 
-#AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'user.User'
 
 AUTHENTICATION_BACKENDS = [
     'user.auth.backends.ModelBackend',

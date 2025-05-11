@@ -17,4 +17,8 @@ INSTALLED_APPS = [
     'huey.contrib.djhuey',
 
     'base',
+    'user',
+    'team',
+    'match',
+    'statistics'
 ]
