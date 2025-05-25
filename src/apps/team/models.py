@@ -75,3 +75,13 @@ class TeamPlayer(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['team', 'player'], name='team_player_unique')
         ]
+
+
+class CommunityLeague(CreatedUpdatedAt):
+    name = models.CharField(max_length=255)
+    code_name = models.CharField(max_length=255, primary_key=True, unique=True)
+
+
+class CommunityLeagueMembers(CreatedUpdatedAt):
+    league = models.ForeignKey(CommunityLeague, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)

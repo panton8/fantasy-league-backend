@@ -54,3 +54,9 @@ class LineUp(CreatedUpdatedAt, UuidPk):
         constraints = [
             UniqueConstraint(fields=['match', 'player'], name='match_unique_player')
         ]
+
+
+class News(CreatedUpdatedAt, UuidPk):
+    title = models.CharField(max_length=100)
+    text = models.TextField()
+    photo = models.URLField()

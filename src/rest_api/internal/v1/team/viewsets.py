@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.viewsets import GenericViewSet
 
 from rest_api.internal.v1.team.filters import PlayerFilter
@@ -58,3 +58,10 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
         team_info = TeamInfoManager().get_line_up(profile.id)
         return Response(status=HTTP_200_OK, data=asdict(team_info))
 
+    @action(detail=False, methods=['PATCH'], url_path='make-sub')
+    def make_transfer(self, request, *args, **kwargs):
+        profile = self.request.user.profile
+        old_player_id = self.request.data['old_player']
+        new_player_id = self.request.data['new_player']
+        TeamInfoManager().make_sub(profile, old_player_id, new_player_id)
+        return Response(status=HTTP_204_NO_CONTENT)

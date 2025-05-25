@@ -1,5 +1,7 @@
 from typing import List
 
+from django.db.transaction import atomic
+
 from team.models import TeamPlayer, Team, Player
 from dataclasses import dataclass
 from uuid import uuid4
@@ -66,3 +68,9 @@ class TeamInfoManager:
             )
 
         return TeamInfoDTO(name=team.name, points=team.points, start_players=start_players, bench_players=bench_players)
+
+    @atomic
+    def make_sub(self, profile, old_player_id, new_player_id):
+        old_player = TeamPlayer.objects.get(team=profile.team, player_id=old_player_id)
+        TeamPlayer.objects.filter(id=old_player_id).delete()
+        TeamPlayer.objects.create(team=profile.team, player_id=new_player_id, is_captain=old_player.is_captain, is_starter=old_player.is_starter)
