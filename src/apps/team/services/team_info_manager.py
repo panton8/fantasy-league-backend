@@ -71,6 +71,15 @@ class TeamInfoManager:
 
     @atomic
     def make_sub(self, profile, old_player_id, new_player_id):
-        old_player = TeamPlayer.objects.get(team=profile.team, player_id=old_player_id)
-        TeamPlayer.objects.filter(id=old_player_id).delete()
-        TeamPlayer.objects.create(team=profile.team, player_id=new_player_id, is_captain=old_player.is_captain, is_starter=old_player.is_starter)
+        TeamPlayer.objects.filter(team=profile.team, player_id=old_player_id).update(is_starter=False)
+        TeamPlayer.objects.filter(team=profile.team, player_id=new_player_id).update(is_starter=True)
+
+    @atomic
+    def make_transfer(self, profile, old_player_id, new_player_id):
+        old_player_info = TeamPlayer.objects.get(team=profile.team, player_id=old_player_id)
+        old_pl_cost = Player.objects.get(id=old_player_id).cost
+        new_pl_cost = Player.objects.get(id=new_player_id).cost
+        if profile.budget + old_pl_cost - new_pl_cost < 0:
+            raise ValueError('Your budget is not enough')
+        TeamPlayer.objects.filter(id=old_player_info.id).delete()
+        TeamPlayer.objects.create(team=profile.team, player_id=new_player_id, is_captain=old_player_info.is_captain, is_starter=old_player_info.is_starter)

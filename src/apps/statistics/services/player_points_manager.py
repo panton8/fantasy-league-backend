@@ -5,6 +5,8 @@ from django.db.models import Count
 from match.models import MatchEvent, LineUp, Match
 from dataclasses import dataclass
 
+from statistics.models import GameWeekStats
+
 
 @dataclass(frozen=True)
 class PlayerWeekStats:
@@ -21,13 +23,16 @@ class PlayerWeekStats:
 
 
 class PlayerPointsManager:
-    def gameweek_points(self, player, matches_id):
+    def make_gameweek_stats(self, player, matches_id):
         player_events = MatchEvent.objects.filter(player=player, match_id__in=matches_id)
         player_line_up = LineUp.objects.filter(match_id__in=matches_id, player=player).first()
 
         player_minutes = self.count_played_minutes(player_events, player_line_up, player.id)
         player_goals_conceded = self.count_goals_conceded(matches_id, player)
         player_stats = self.count_stats(player_events)
+        player_stats['minutes'] = player_minutes
+        player_stats['goals_conceded'] = player_goals_conceded
+        stats = self.insert_gameweek_stats(player.id, player_line_up.match.gameweek.id, player_stats)
 
     def count_played_minutes(self, events, line_up, player_id):
         if not line_up:
@@ -57,4 +62,20 @@ class PlayerPointsManager:
         )['total_goals']
 
     def insert_gameweek_stats(self, player_id, game_week_id, stats):
-        ...
+        return GameWeekStats.objects.update_or_create(
+            gameweek_id=game_week_id,
+            player_id=player_id,
+            defaults={
+                'goals': stats['goal'],
+                'assists': stats['assist'],
+                'yellow_cards': stats['yellow_card'],
+                'red_cards': stats['red_card'],
+                'saves': stats['save'],
+                'minutes': stats['minutes'],
+                'own_goals': stats['own_goal'],
+                'penalties_saved': stats['penalty_save'],
+                'penalties_missed': stats['penalty_miss'],
+                'goals_conceded': stats['goals_conceded'],
+                'clean_sheet': stats['goals_conceded'] == 0,
+            }
+        )

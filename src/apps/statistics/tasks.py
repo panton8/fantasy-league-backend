@@ -28,7 +28,7 @@ def count_player_gameweek_stats(player_id, matches_id, game_week_id):
     logger.info(f'[PLayer stats] Run task for player_id={player_id}')
     try:
         player = Player.objects.get(id=player_id)
-        PlayerPointsManager.gameweek_points(player, matches_id, game_week_id)
+        PlayerPointsManager.make_gameweek_stats(player, matches_id, game_week_id)
     except Exception as exc:
         logger.exception(f'[run_lender_auto_approve] Task exception {exc}')
         return
