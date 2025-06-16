@@ -16,6 +16,7 @@ class PlayerDTO:
     position: str
     is_captain: bool
     t_shirt: str
+    cost: float=None
 
 
 @dataclass(frozen=True)
@@ -34,7 +35,7 @@ class TeamInfoManager:
         team_info = (TeamPlayer.objects
                      .filter(team_id=team.id)
                      .select_related('player', 'team')
-                     .values('player_id', 'player__surname', 'player__position', 'is_captain', 'is_starter', 'player__club__t_shirt_logo_url')
+                     .values('player_id', 'player__surname', 'player__position', 'is_captain', 'is_starter', 'player__club__t_shirt_logo_url', 'player__cost')
                      .annotate(
                         status_ordering=Case(
                             When(player__position=Player.Position.GOALKEEPER, then=Value(1)),
@@ -54,6 +55,7 @@ class TeamInfoManager:
                         position=info['player__position'],
                         is_captain=info['is_captain'],
                         t_shirt=info['player__club__t_shirt_logo_url'],
+                        cost=info['player__cost']
                     )
                 )
                 continue
@@ -64,6 +66,7 @@ class TeamInfoManager:
                     position=info['player__position'],
                     is_captain=info['is_captain'],
                     t_shirt=info['player__club__t_shirt_logo_url'],
+                    cost=info['player__cost']
                 )
             )
 
@@ -83,3 +86,8 @@ class TeamInfoManager:
             raise ValueError('Your budget is not enough')
         TeamPlayer.objects.filter(id=old_player_info.id).delete()
         TeamPlayer.objects.create(team=profile.team, player_id=new_player_id, is_captain=old_player_info.is_captain, is_starter=old_player_info.is_starter)
+
+    @atomic
+    def change_captain(self,  profile, player_id):
+        TeamPlayer.objects.filter(team=profile.team).update(is_captain=False)
+        TeamPlayer.objects.filter(team=profile.team, player_id=player_id).update(is_captain=True)

@@ -73,3 +73,10 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
         new_player_id = self.request.data['new_player']
         TeamInfoManager().make_transfer(profile, old_player_id, new_player_id)
         return Response(status=HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['PATCH'], url_path='change-captain')
+    def change_captain(self, request, *args, **kwargs):
+        profile = self.request.user.profile
+        captain_id = self.request.data['captain_id']
+        TeamInfoManager().change_captain(profile, captain_id)
+        return Response(status=HTTP_204_NO_CONTENT)

@@ -68,3 +68,9 @@ class MatchViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         }
 
         return Response(data, status=HTTP_200_OK)
+
+
+'''class NewsViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    queryset = News.objects.all().order_by('-created_at')
+    serializer_class = GameWeekMatchesSerializer
+    permission_classes = [AllowAny]'''

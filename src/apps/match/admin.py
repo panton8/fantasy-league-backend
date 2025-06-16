@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from match.models import LineUp, Match, MatchEvent, GameWeek, MatchAction
+from match.models import LineUp, Match, MatchEvent, GameWeek, MatchAction, News
 from team.models import Player
 
 
@@ -55,3 +55,9 @@ class MatchAdmin(admin.ModelAdmin):
     list_display = ('home_club', 'away_club', 'start_time', 'full_time')
     inlines = [MatchLineupInline, MatchEventInline]
     ordering = ('-start_time', )
+
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+    ordering = ('-created_at', )

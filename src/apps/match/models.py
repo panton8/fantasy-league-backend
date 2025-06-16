@@ -60,3 +60,6 @@ class News(CreatedUpdatedAt, UuidPk):
     title = models.CharField(max_length=100)
     text = models.TextField()
     photo = models.URLField()
+
+    class Meta:
+        verbose_name_plural = 'news'
