@@ -52,6 +52,22 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
         team_id = serializer.create(data)
         return Response(status=HTTP_201_CREATED, data={'team_id': team_id})
 
+    @action(detail=False, methods=['GET'], url_path='team-place')
+    def team_place(self, request, *args, **kwargs):
+        profile = self.request.user.profile
+        teams = Team.objects.all().order_by('-points')
+        points = None
+        place = 1
+        for team in teams:
+            if not hasattr(profile, 'team'):
+                place = None
+                break
+            if team.id == profile.team.id:
+                points = team.points
+                break
+            place += 1
+        return Response(status=HTTP_200_OK, data={'place': place, 'points': points})
+
     @action(detail=False, methods=['GET'], url_path='team-info')
     def team_info(self, request, *args, **kwargs):
         profile = self.request.user.profile
