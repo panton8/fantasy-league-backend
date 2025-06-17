@@ -1,4 +1,4 @@
-from match.models import Match, LineUp
+from match.models import Match, LineUp, News
 from rest_framework import serializers
 from rest_api.internal.v1.team.serializers import ClubListSerializer
 from team.models import Player
@@ -58,3 +58,9 @@ class LineUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineUp
         fields = ('player', )
+
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ('id', 'title', 'text', 'photo')

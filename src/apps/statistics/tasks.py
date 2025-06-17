@@ -1,8 +1,10 @@
 import logging
 
+from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 from match.models import Match, MatchEvent, LineUp
 from match.services.gameweek_manager import GameweekManager
+from statistics.models import GameWeekStats
 from statistics.services.player_points_manager import PlayerPointsManager
 from team.models import Player
 
@@ -14,7 +16,7 @@ __all__ = (
 )
 
 
-@db_periodic_task()
+@db_periodic_task(crontab(hour='21', minute='0'))
 def count_players_gameweek_stats():
     actual_gameweek = GameweekManager().get_actual_gameweek()
     matches_id = Match.objects.filter(gameweek=actual_gameweek).values_list('id', flat=True)
@@ -34,3 +36,4 @@ def count_player_gameweek_stats(player_id, matches_id, game_week_id):
         return
 
     logger.debug(f'[run_lender_auto_approve] Finish task for profile_id={player_id}')
+

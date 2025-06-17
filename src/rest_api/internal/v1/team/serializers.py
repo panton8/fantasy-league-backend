@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.db.transaction import atomic
 from rest_framework import serializers
-from team.models import Player, TeamPlayer, Team, Club
+from team.models import Player, TeamPlayer, Team, Club, CommunityLeague, CommunityLeagueMembers
 
 
 class ClubListSerializer(serializers.ModelSerializer):
@@ -89,3 +89,19 @@ class TeamPlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamPlayer
         fields = ('player', 'is_captain', 'is_starter')
+
+
+class CommunityLeagueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CommunityLeague
+        fields = ('name', 'code_name')
+
+
+class CommunityLeagueMemberSerializer(serializers.ModelSerializer):
+    team_name = serializers.CharField(source='team.name')
+    team_points = serializers.IntegerField(source='team.points')
+
+    class Meta:
+        model = CommunityLeagueMembers
+        fields = ('team_name', 'team_points')

@@ -8,8 +8,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from rest_api.internal.v1.team.filters import PlayerFilter
 from rest_api.internal.v1.team.serializers import PlayerListSerializer, ClubListSerializer, ClubDetailSerializer, \
-    TableSerializer, TeamSerializer
-from team.models import Player, Team, Club
+    TableSerializer, TeamSerializer, CommunityLeagueSerializer, CommunityLeagueMemberSerializer
+from team.models import Player, Team, Club, CommunityLeague, CommunityLeagueMembers
 from team.services.club_position_service import ClubPositionService
 from team.services.team_info_manager import TeamInfoManager
 from dataclasses import asdict
@@ -58,6 +58,12 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
         team_info = TeamInfoManager().get_line_up(profile.id)
         return Response(status=HTTP_200_OK, data=asdict(team_info))
 
+    @action(detail=False, methods=['GET'], url_path='team-info-points')
+    def team_info_points(self, request, *args, **kwargs):
+        profile = self.request.user.profile
+        team_info = TeamInfoManager().get_line_up_points(profile.id)
+        return Response(status=HTTP_200_OK, data=asdict(team_info))
+
     @action(detail=False, methods=['PATCH'], url_path='make-sub')
     def make_sub(self, request, *args, **kwargs):
         profile = self.request.user.profile
@@ -80,3 +86,39 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
         captain_id = self.request.data['captain_id']
         TeamInfoManager().change_captain(profile, captain_id)
         return Response(status=HTTP_204_NO_CONTENT)
+
+
+class CommunityLeagueViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin):
+    queryset = CommunityLeague.objects.all()
+    serializer_class = CommunityLeagueSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'list':
+            profile = self.request.user.profile
+            ids = CommunityLeagueMembers.objects.filter(team=profile.team).values_list('league_id', flat=True)
+            qs = qs.filter(pk__in=ids)
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+        profile = self.request.user.profile
+        CommunityLeagueMembers.objects.create(team=profile.team, league_id=self.request.data['code_name'])
+        return Response(status=HTTP_201_CREATED)
+
+    def retrieve(self, request, *args, **kwargs):
+        league = self.get_object()
+        members = CommunityLeagueMembers.objects.filter(league=league)
+        members_data = CommunityLeagueMemberSerializer(members, many=True).data
+        return Response(status=HTTP_200_OK, data=members_data)
+
+
+class CommunityLeagueMembersViewSet(GenericViewSet):
+    queryset = CommunityLeagueMembers.objects.all()
+
+    @action(detail=False, methods=['POST'])
+    def add_member(self, request, *args, **kwargs):
+        profile = self.request.user.profile
+        id = self.request.data['league_code']
+        CommunityLeagueMembers.objects.create(team=profile.team, league_pk=id)
+        return Response(status=HTTP_201_CREATED)

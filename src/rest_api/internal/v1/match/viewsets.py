@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.viewsets import GenericViewSet
 
-from match.models import Match
+from match.models import Match, News
 from match.services.line_up_manager import LineUpManager
 from match.services.match_service import MatchService
 from match.services.summary_manager import SummaryManager
 from rest_api.internal.v1.match.filters import MatchFilter
-from rest_api.internal.v1.match.serializers import GameWeekMatchesSerializer, LineUpSerializer, MatchDetailSerializer
+from rest_api.internal.v1.match.serializers import GameWeekMatchesSerializer, LineUpSerializer, MatchDetailSerializer, \
+    NewsSerializer
 
 
 class MatchViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -70,7 +71,7 @@ class MatchViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         return Response(data, status=HTTP_200_OK)
 
 
-'''class NewsViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class NewsViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     queryset = News.objects.all().order_by('-created_at')
-    serializer_class = GameWeekMatchesSerializer
-    permission_classes = [AllowAny]'''
+    serializer_class = NewsSerializer
+    permission_classes = [AllowAny]

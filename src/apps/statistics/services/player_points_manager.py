@@ -6,6 +6,7 @@ from match.models import MatchEvent, LineUp, Match
 from dataclasses import dataclass
 
 from statistics.models import GameWeekStats
+from team.models import Player
 
 
 @dataclass(frozen=True)
@@ -79,3 +80,91 @@ class PlayerPointsManager:
                 'clean_sheet': stats['goals_conceded'] == 0,
             }
         )
+
+    def count_points(self, actual_gameweek, player_id):
+        stats = GameWeekStats.objects.filter(gameweek=actual_gameweek, player_id=player_id).first()
+        if not stats:
+            return {
+            'goal': {'count': 0, 'points': 0},
+            'assist': {'count': 0, 'points': 0},
+            'yellow_card': {'count': 0, 'points': 0},
+            'red_card': {'count': 0, 'points': 0},
+            'save': {'count': 0, 'points': 0},
+            'minute': {'count': 0, 'points': 0},
+            'own_goal': {'count': 0, 'points': 0},
+            'penalty_saved': {'count': 0, 'points': 0},
+            'penalty_missed':{'count': 0, 'points': 0},
+            'goals_conceded': {'count': 0, 'points': 0},
+        }
+        goal_points = self.__count_goal_points(stats.goals, stats.player.position)
+        assists_points = self.__count_assists_points(stats.assists)
+        yellow_cards_points = self.__count_yellow_cards_points(stats.yellow_cards)
+        red_cards_points = self.__count_red_cards_points(stats.red_cards)
+        saves_points = self.__count_saves_points(stats.saves)
+        minutes_points = self.__count_minutes_points(stats.minutes)
+        own_goal_points = self.__count_own_goal_points(stats.own_goals)
+        penalty_save_points = self.__count_penalties_saves_points(stats.penalties_saved)
+        penalty_miss_points = self.__count_penalties_misses_points(stats.penalties_missed)
+        clean_sheet_points = self.__count_clean_sheet_points(stats.clean_sheet, stats.player.position)
+        return {
+            'goal': {'count': stats.goals, 'points': goal_points},
+            'assist': {'count': stats.assists, 'points': assists_points},
+            'yellow_card': {'count': stats.yellow_cards, 'points': yellow_cards_points},
+            'red_card': {'count': stats.red_cards, 'points': red_cards_points},
+            'save': {'count': stats.saves, 'points': saves_points},
+            'minute': {'count': stats.minutes, 'points': minutes_points},
+            'own_goal': {'count': stats.own_goals, 'points': own_goal_points},
+            'penalty_saved': {'count': stats.penalties_saved, 'points': penalty_save_points},
+            'penalty_missed':{'count': stats.penalties_missed, 'points': penalty_miss_points},
+            'goals_conceded': {'count': stats.goals_conceded, 'points': clean_sheet_points if stats.minutes else 0},
+        }
+
+    def __count_goal_points(self, count, position):
+        match position:
+            case Player.Position.FORWARD:
+                return count * 4
+            case Player.Position.MIDFIELDER:
+                return count * 5
+            case Player.Position.DEFENDER:
+                return count * 6
+            case Player.Position.GOALKEEPER:
+                return count * 10
+
+    def __count_assists_points(self, count):
+        return count * 3
+
+    def __count_yellow_cards_points(self, count):
+        return count * -1
+
+    def __count_red_cards_points(self, count):
+        return count * -3
+
+    def __count_saves_points(self, count):
+        return count // 3
+
+    def __count_minutes_points(self, count):
+        if count == 0:
+            return 0
+        if count < 60:
+            return 1
+        return 2
+
+    def __count_own_goal_points(self, count):
+        return count * -2
+
+    def __count_penalties_saves_points(self, count):
+        return count * -5
+
+    def __count_penalties_misses_points(self, count):
+        return count * -2
+
+    def __count_clean_sheet_points(self, clean_sheet, position):
+        if not clean_sheet:
+            return 0
+        match position:
+            case Player.Position.MIDFIELDER:
+                return 1
+            case Player.Position.FORWARD:
+                return 0
+            case _:
+                return 4

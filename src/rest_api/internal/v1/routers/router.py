@@ -1,5 +1,6 @@
-from rest_api.internal.v1.match.viewsets import MatchViewSet
-from rest_api.internal.v1.team.viewsets import TeamViewSet, ClubViewSet, PlayerViewSet
+from rest_api.internal.v1.match.viewsets import MatchViewSet, NewsViewSet
+from rest_api.internal.v1.team.viewsets import TeamViewSet, ClubViewSet, PlayerViewSet, CommunityLeagueViewSet, \
+    CommunityLeagueMembersViewSet
 from rest_api.internal.v1.user.viewsets.profile import UserProfileViewSet
 from rest_api.internal.v1.user.viewsets.refresh_token import RefreshTokenViewSet
 from rest_api.internal.v1.user.viewsets.sign_in import SignInViewSet
@@ -17,3 +18,6 @@ router.register(r'user', UserProfileViewSet, basename='user')
 router.register(r'club', ClubViewSet, basename='club')
 router.register(r'match', MatchViewSet, basename='match')
 router.register(r'player', PlayerViewSet, basename='player')
+router.register(r'news',  NewsViewSet, basename='news')
+router.register(r'community_league', CommunityLeagueViewSet, basename='community_league')
+router.register(r'community_league_members', CommunityLeagueMembersViewSet, basename='community_league_members')
