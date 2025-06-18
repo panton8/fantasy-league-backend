@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.viewsets import GenericViewSet
+from match.services.gameweek_manager import GameweekManager
 
 from rest_api.internal.v1.team.filters import PlayerFilter
 from rest_api.internal.v1.team.serializers import PlayerListSerializer, ClubListSerializer, ClubDetailSerializer, \
@@ -66,7 +67,8 @@ class TeamViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
                 points = team.points
                 break
             place += 1
-        return Response(status=HTTP_200_OK, data={'place': place, 'points': points})
+        week = GameweekManager().get_actual_gameweek()
+        return Response(status=HTTP_200_OK, data={'place': place, 'points': points, 'week': week.number})
 
     @action(detail=False, methods=['GET'], url_path='team-info')
     def team_info(self, request, *args, **kwargs):

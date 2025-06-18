@@ -161,6 +161,8 @@ class TeamInfoManager:
             raise ValueError('Your budget is not enough')
         TeamPlayer.objects.filter(id=old_player_info.id).delete()
         TeamPlayer.objects.create(team=profile.team, player_id=new_player_id, is_captain=old_player_info.is_captain, is_starter=old_player_info.is_starter)
+        profile.budget = profile.budget + old_pl_cost - new_pl_cost
+        profile.save()
 
     @atomic
     def change_captain(self,  profile, player_id):
